@@ -15,7 +15,7 @@ public class BookingDto {
 
     private Long booker;
 
-    @NotNull(message = "Start date cannot be null")
+    @NotNull(message = "Start date не может быть нулевой")
     @FutureOrPresent(message = "Start date must be in present or future")
     private LocalDateTime start;
 

@@ -7,9 +7,14 @@ import java.util.Optional;
 
 public interface BookingRepository {
     Booking save(Booking booking);
+
     Optional<Booking> findById(Long id);
+
     List<Booking> findByBookerId(Long bookerId);
+
     List<Booking> findByItemOwnerId(Long ownerId);
+
     List<Booking> findByItemId(Long itemId);
+
     void deleteById(Long id);
 }

@@ -25,10 +25,10 @@ public class ItemDto {
     private Boolean available;
 
     @NotNull(message = "Owner ID не может быть пустой")
-    private long owner;
+    private Long owner;
     private long request;
 
-    public ItemDto(long id, String name, String description, Boolean available, long owner) {
+    public ItemDto(long id, String name, String description, Boolean available, Long owner) {
         this.id = id;
         this.name = name;
         this.description = description;

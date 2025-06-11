@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,11 +12,19 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class ItemDto {
-    @NotNull(message = "ID cannot be null")
+    @NotNull(message = "ID не может быть пустым")
     private long id;
+
+    @NotBlank(message = "Name не может быть пустой")
     private String name;
+
+    @NotBlank(message = "Description не может быть пустым")
     private String description;
+
+    @NotNull(message = "Available не может быть пустым")
     private Boolean available;
+
+    @NotNull(message = "Owner ID не может быть пустой")
     private long owner;
     private long request;
 

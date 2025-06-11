@@ -17,6 +17,11 @@
 
 	<properties>
 		<java.version>21</java.version>
+		<com.sun.mail.version>1.6.2</com.sun.mail.version>
+		<maven-checkstyle-plugin.version>3.1.2</maven-checkstyle-plugin.version>
+		<com.puppycrawl.tools.version>10.3</com.puppycrawl.tools.version>
+		<com.github.spotbugs.version>4.8.5.0</com.github.spotbugs.version>
+		<org.jacoco.version>0.8.12</org.jacoco.version>
 	</properties>
 
 	<dependencies>
@@ -31,7 +36,7 @@
 		<dependency>
 			<groupId>com.sun.mail</groupId>
 			<artifactId>javax.mail</artifactId>
-			<version>1.6.2</version>
+			<version>${com.sun.mail.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -102,7 +107,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-checkstyle-plugin</artifactId>
-					<version>3.1.2</version>
+					<version>${maven-checkstyle-plugin.version}</version>
 					<configuration>
 						<configLocation>checkstyle.xml</configLocation>
 						<failOnViolation>true</failOnViolation>
@@ -121,14 +126,14 @@
 						<dependency>
 							<groupId>com.puppycrawl.tools</groupId>
 							<artifactId>checkstyle</artifactId>
-							<version>10.3</version>
+							<version>${com.puppycrawl.tools.version}</version>
 						</dependency>
 					</dependencies>
 				</plugin>
 				<plugin>
 					<groupId>com.github.spotbugs</groupId>
 					<artifactId>spotbugs-maven-plugin</artifactId>
-					<version>4.8.5.0</version>
+					<version>${com.github.spotbugs.version}</version>
 					<configuration>
 						<effort>Max</effort>
 						<threshold>High</threshold>
@@ -144,7 +149,7 @@
 				<plugin>
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
-					<version>0.8.12</version>
+					<version>${org.jacoco.version}</version>
 					<configuration>
 						<output>file</output>
 					</configuration>

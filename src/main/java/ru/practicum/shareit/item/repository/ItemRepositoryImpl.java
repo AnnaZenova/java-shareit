@@ -27,14 +27,14 @@ public class ItemRepositoryImpl implements ItemRepository {
 
     @Override
     public Optional<Item> getItemById(long id) {
-        log.info("Запрошена вещь id:{}.");
+        log.info("Запрошена вещь id:{}", id);
         return Optional.ofNullable(items.get(id));
     }
 
     @Override
     public Item updateItem(Item item) {
         items.put(item.getId(), item);
-        log.info("Обновлены данные вещи id: {} пользователя id: {}.", item.getId(), item.getOwner().getId());
+        log.info("Обновлены данные вещи c id: {}", item.getId());
         return item;
     }
 

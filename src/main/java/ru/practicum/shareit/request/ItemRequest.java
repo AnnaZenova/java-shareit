@@ -11,6 +11,6 @@ public class ItemRequest {
     @NotNull
     private String description;
     @NotNull
-    private User requestor;
+    private User requester;
     private LocalDateTime created;
 }

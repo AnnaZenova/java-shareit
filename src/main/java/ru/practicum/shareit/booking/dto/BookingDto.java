@@ -11,19 +11,21 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 public class BookingDto {
+    @NotNull(message = "ID не может быть пустой")
     private Long id;
 
+    @NotNull(message = "Booker ID не может быть пустой")
     private Long booker;
 
-    @NotNull(message = "Start date не может быть нулевой")
-    @FutureOrPresent(message = "Start date must be in present or future")
+    @NotNull(message = "Start date не может быть пустой")
+    @FutureOrPresent(message = "Start date должна быть в настоящем или будущем")
     private LocalDateTime start;
 
-    @NotNull(message = "End date cannot be null")
-    @Future(message = "End date must be in future")
+    @NotNull(message = "End date не можеть быть пустой")
+    @Future(message = "End date должна быть в будущем")
     private LocalDateTime end;
 
-    @NotNull(message = "Item ID cannot be null")
+    @NotNull(message = "Item ID не может быть пустой")
     private Long item;
     private Status status;
 

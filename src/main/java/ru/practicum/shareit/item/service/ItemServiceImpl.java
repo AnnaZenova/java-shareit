@@ -1,17 +1,19 @@
 package ru.practicum.shareit.item.service;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exceptions.ElementNotFoundException;
-import ru.practicum.shareit.exceptions.ValidationException;
 import ru.practicum.shareit.item.Item;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.Collection;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -21,80 +23,76 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
 
     @Override
-    public Item addItem(long userId, Item item) {
+    public ItemDto addItem(Long userId,@Valid ItemDto itemDto) {
         checkUserById(userId);
-        checkInputDataByAddItem(item);
-        User user = userRepository.getUserById(userId).get();
-        item.setOwner(user);
-        return itemRepository.addItem(item);
+        User owner = userRepository.getUserById(userId)
+                .orElseThrow(() -> new ElementNotFoundException("Пользователь не найден"));
+        Item item = ItemMapper.toItem(itemDto,owner);
+        item.setOwner(owner);
+        log.info("Добавлена вещь :{} пользователю с ID :{}", itemDto, userId);
+        return ItemMapper.toItemDto(itemRepository.addItem(item));
     }
 
     @Override
-    public Item updateItem(long userId, long itemId, Item updatedItem) {
+    public ItemDto updateItem(Long userId, Long itemId,@Valid ItemDto itemDto) {
         checkUserById(userId);
-        Item item = getItemById(itemId);
+        User owner = userRepository.getUserById(userId)
+                .orElseThrow(() -> new ElementNotFoundException("Пользователь не найден"));
+        Item item = ItemMapper.toItem(getItemById(itemId),owner);
         if (item.getOwner().getId() != userId) {
-            throw new ElementNotFoundException(String.format("вещь id:{} у пользователя с id:{}", item.getId(), userId));
+            throw new ElementNotFoundException(String.format("вещь с ID :{} у пользователя с ID :{}", item.getId(), userId));
         }
-        if (updatedItem.getName() != null) {
-            if (!updatedItem.getName().isBlank()) {
-                item.setName(updatedItem.getName());
+        if (itemDto.getName() != null) {
+            if (!itemDto.getName().isBlank()) {
+                item.setName(itemDto.getName());
             }
         }
-        if (updatedItem.getDescription() != null) {
-            if (!updatedItem.getDescription().isBlank()) {
-                item.setDescription(updatedItem.getDescription());
+        if (itemDto.getDescription() != null) {
+            if (!itemDto.getDescription().isBlank()) {
+                item.setDescription(itemDto.getDescription());
             }
         }
-        if (updatedItem.getAvailable() != null) {
-            item.setAvailable(updatedItem.getAvailable());
+        if (itemDto.getAvailable() != null) {
+            item.setAvailable(itemDto.getAvailable());
         }
-        return itemRepository.updateItem(item);
+        log.info("Обновлена вещь с ID :{} пользователю с ID :{}", itemId, userId);
+        return ItemMapper.toItemDto(itemRepository.updateItem(item));
     }
 
     @Override
-    public Item getItemById(long id) {
-        Optional<Item> item = itemRepository.getItemById(id);
-        if (item.isEmpty()) {
-            throw new ElementNotFoundException(String.format("вещь с id%d.", id));
-        }
-        log.info(String.format("Запрошена вещь с id%d", id));
-        return item.get();
-    }
-
-    private void checkInputDataByAddItem(Item item) {
-        if (item.getName() == null || item.getName().isBlank()) {
-            throw new ValidationException("item.Name = null или item.Name состоит из пробелов");
-        }
-        if (item.getDescription() == null || item.getDescription().isBlank()) {
-            throw new ValidationException("item.Description = null");
-        }
-        if (item.getAvailable() == null) {
-            throw new ValidationException("item.isAvailable = null");
-        }
+    public ItemDto getItemById(Long id) {
+        Item item = itemRepository.getItemById(id)
+                .orElseThrow(() -> new ElementNotFoundException(String.format("вещь с ID :{}", id)));
+        log.info("Запрошена вещь с id:{}", id);
+        return ItemMapper.toItemDto(item);
     }
 
     private void checkUserById(long userId) {
         if (!userRepository.checkUserById(userId)) {
-            throw new ElementNotFoundException(String.format("пользователь с id%d.", userId));
+            throw new ElementNotFoundException(String.format("пользователь с ID :{} не найден", userId));
         }
     }
 
     @Override
-    public Collection<Item> getUserItems(long userId) {
+    public Collection<ItemDto> getUserItems(Long userId) {
         checkUserById(userId);
-        return itemRepository.getUserItems(userId);
+        log.info("Получены вещи пользователя с ID: {}",userId);
+        return itemRepository.getUserItems(userId).stream()
+                .map(ItemMapper::toItemDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Collection<Item> searchAvailableItems(String text) {
-        log.info("Поиск вещей по запросу - {}.", text);
-        return itemRepository.searchAvailableItems(text.toLowerCase());
+    public Collection<ItemDto> searchAvailableItems(String text) {
+        log.info("Поиск вещей по запросу - {}", text);
+        return itemRepository.searchAvailableItems(text.toLowerCase()).stream()
+                .map(ItemMapper::toItemDto)
+                .collect(Collectors.toList());
     }
 
     @Override
     public Item getItemEntity(Long itemId) {
         return itemRepository.getItemById(itemId)
-                .orElseThrow(() -> new ElementNotFoundException("Item not found"));
+                .orElseThrow(() -> new ElementNotFoundException("Item не найден"));
     }
 }

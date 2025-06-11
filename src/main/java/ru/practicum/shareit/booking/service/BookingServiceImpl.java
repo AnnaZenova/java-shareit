@@ -51,7 +51,7 @@ public class BookingServiceImpl implements BookingService {
     public BookingDto approveBooking(Long ownerId, Long bookingId, boolean approved) {
         log.info("Подтверждение бронирования ID: {} владельцем ID: {}", bookingId, ownerId);
         Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new ElementNotFoundException("Booking не найдено"));
+                .orElseThrow(() -> new ElementNotFoundException("Booking not found"));
 
         if (!booking.getItem().getOwner().getId().equals(ownerId)) {
             throw new ValidationException("Только owner может подтвердить бронирование");

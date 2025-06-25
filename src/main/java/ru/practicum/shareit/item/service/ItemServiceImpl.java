@@ -138,11 +138,9 @@ public class ItemServiceImpl implements ItemService {
     }
 
     private BookingShortDto getLastBooking(Long itemId) {
-        // Получаем последнее завершенное бронирование
-        return bookingRepository.findFirstByItemIdAndEndBeforeAndStatusIn(
+        return bookingRepository.findFirstByItemIdAndEndBeforeOrderByEndDesc(
                         itemId,
-                        LocalDateTime.now(),
-                        List.of(Status.APPROVED, Status.CANCELED) // Только завершенные или отмененные
+                        LocalDateTime.now().minusSeconds(5)
                 )
                 .map(booking -> BookingShortDto.builder()
                         .id(booking.getId())

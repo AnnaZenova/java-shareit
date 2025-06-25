@@ -23,7 +23,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Collection<User> getAllUsers() {
-        return userRepository.getAllUsers();
+        return userRepository.findAll();
     }
 
     @Override
@@ -31,12 +31,12 @@ public class UserServiceImpl implements UserService {
         User user = UserMapper.toUser(userDto);
         checkEmailAvailability(user.getEmail());
         log.info("Добавлен пользователь :{}", userDto);
-        return UserMapper.toUserDto(userRepository.addUser(user));
+        return UserMapper.toUserDto(userRepository.save(user));
     }
 
     @Override
     public UserDto getUserById(Long id) {
-        Optional<User> optionalUser = userRepository.getUserById(id);
+        Optional<User> optionalUser = userRepository.findById(id);
         if (optionalUser.isEmpty()) {
             throw new ElementNotFoundException(String.format("Не найден пользователь с id%d.", id));
         }
@@ -59,9 +59,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public long removeUserById(long id) {
+    public void removeUserById(long id) {
         log.info("Удален пользователь с ID :{}", id);
-        return userRepository.removeUserById(id);
     }
 
     private void checkValidEmailAddress(String email) {
@@ -86,7 +85,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserEntity(Long userId) {
-        return userRepository.getUserById(userId)
+        return userRepository.findById(userId)
                 .orElseThrow(() -> new ElementNotFoundException("User not found"));
     }
 }

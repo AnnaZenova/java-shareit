@@ -1,39 +1,43 @@
 package ru.practicum.shareit.booking.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 
 import jakarta.validation.constraints.*;
+import lombok.NoArgsConstructor;
 import ru.practicum.shareit.booking.model.Status;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.user.dto.UserDto;
 
 import java.time.LocalDateTime;
 
 @Data
+@Builder
+@NoArgsConstructor
 @AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class BookingDto {
-    @NotNull(message = "ID не может быть пустой")
     private Long id;
 
-    @NotNull(message = "Booker ID не может быть пустой")
-    private Long booker;
-
-    @NotNull(message = "Start date не может быть пустой")
-    @FutureOrPresent(message = "Start date должна быть в настоящем или будущем")
+    @NotNull
+    @FutureOrPresent
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime start;
 
-    @NotNull(message = "End date не можеть быть пустой")
-    @Future(message = "End date должна быть в будущем")
+    @NotNull
+    @Future
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime end;
 
-    @NotNull(message = "Item ID не может быть пустой")
-    private Long item;
+    @NotNull
+    private Long itemId;
+
+    private Long bookerId;
     private Status status;
 
-    public BookingDto(LocalDateTime start, LocalDateTime end, long item, long booker, Status status) {
-        this.start = start;
-        this.end = end;
-        this.item = item;
-        this.booker = booker;
-        this.status = status;
-    }
+    private UserDto booker;
+    private ItemDto item;
 }

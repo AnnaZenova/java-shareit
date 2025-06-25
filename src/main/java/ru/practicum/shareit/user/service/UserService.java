@@ -14,7 +14,7 @@ public interface UserService {
 
     UserDto getUserById(Long userId);
 
-    long removeUserById(long id);
+    void removeUserById(long id);
 
     User getUserEntity(Long userId);
 }

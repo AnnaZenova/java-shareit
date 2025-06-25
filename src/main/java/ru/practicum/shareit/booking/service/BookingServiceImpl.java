@@ -7,10 +7,11 @@ import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exceptions.ElementNotFoundException;
 import ru.practicum.shareit.exceptions.ValidationException;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.item.Item;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
@@ -25,26 +26,39 @@ import java.util.stream.Collectors;
 public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final UserService userService;
+    private final ItemRepository itemRepository;
     private final ItemService itemService;
 
     @Override
     public BookingDto createBooking(Long userId, BookingDto bookingDto) {
-        log.info("Создание бронирования для пользователя ID: {}", userId);
+        // 1. Валидация DTO
+        if (bookingDto.getStart() == null || bookingDto.getEnd() == null || bookingDto.getItemId() == null) {
+            throw new ValidationException("Не заполнены обязательные поля");
+        }
+
+        // 2. Проверка существования пользователя и предмета
         User booker = userService.getUserEntity(userId);
-        Item item = itemService.getItemEntity(bookingDto.getItem());
+        Item item = itemRepository.findById(bookingDto.getItemId())
+                .orElseThrow(() -> new ElementNotFoundException("Предмет не найден"));
 
+        // 3. Бизнес-логика
         if (!item.getAvailable()) {
-            throw new ElementNotFoundException("Item недоступен к бронированию");
+            throw new ValidationException("Предмет недоступен для бронирования");
         }
-
         if (item.getOwner().getId().equals(userId)) {
-            throw new ValidationException("Owner не может забронировать");
+            throw new ValidationException("Владелец не может бронировать свой предмет");
+        }
+        if (bookingDto.getStart().isAfter(bookingDto.getEnd())) {
+            throw new ValidationException("Дата начала должна быть раньше даты окончания");
         }
 
+        // 4. Сохранение
         Booking booking = BookingMapper.toBooking(bookingDto, item, booker);
         Booking savedBooking = bookingRepository.save(booking);
-        log.info("Создано бронирование ID: {}", savedBooking.getId());
-        return BookingMapper.toBookingDto(savedBooking);
+        BookingDto response = BookingMapper.toBookingDto(savedBooking);
+        response.setBooker(userService.getUserById(booking.getBooker().getId())); // Получаем полные данные о пользователе
+        response.setItem(itemService.getItemById(booking.getItem().getId())); // Получаем полные данные о вещи
+        return response;
     }
 
     @Override
@@ -64,7 +78,10 @@ public class BookingServiceImpl implements BookingService {
         booking.setStatus(approved ? Status.APPROVED : Status.REJECTED);
         Booking updatedBooking = bookingRepository.save(booking);
         log.info("Бронирование ID: {} обновлено со статусом: {}", bookingId, updatedBooking.getStatus());
-        return BookingMapper.toBookingDto(updatedBooking);
+        BookingDto response =  BookingMapper.toBookingDto(updatedBooking);
+        response.setBooker(userService.getUserById(booking.getBooker().getId())); // Получаем полные данные о пользователе
+        response.setItem(itemService.getItemById(booking.getItem().getId())); // Получаем полные данные о вещи
+        return response;
     }
 
     @Override
@@ -78,27 +95,26 @@ public class BookingServiceImpl implements BookingService {
             throw new ValidationException("Only booker or owner can view booking");
         }
         log.info("Получено бронирование с ID: {} пользователя с ID: {}", bookingId, userId);
-        return BookingMapper.toBookingDto(booking);
+        BookingDto response = BookingMapper.toBookingDto(booking);
+        response.setBooker(userService.getUserById(booking.getBooker().getId())); // Получаем полные данные о пользователе
+        response.setItem(itemService.getItemById(booking.getItem().getId())); // Получаем полные данные о вещи
+        return response;
     }
 
     @Override
     public List<BookingDto> getUserBookings(Long userId, String state) {
         userExists(userId);
-        List<Booking> bookings = bookingRepository.findByBookerId(userId);
+        List<Booking> bookings = bookingRepository.findByBookerIdOrderByStartDesc(userId);
         log.info("Получено бронирование пользователя ID: {} со статусом: {}", userId, state);
-        return filterBookingsByState(bookings, state).stream()
-                .map(BookingMapper::toBookingDto)
-                .collect(Collectors.toList());
+        return mapToBookingDtos(filterBookingsByState(bookings, state));
     }
 
     @Override
     public List<BookingDto> getOwnerBookings(Long ownerId, String state) {
         userExists(ownerId);
-        List<Booking> bookings = bookingRepository.findByItemOwnerId(ownerId);
+        List<Booking> bookings = bookingRepository.findByItemOwnerIdOrderByStartDesc(ownerId);
         log.info("Получены бронирования владельца с ID: {} со статусом: {}", ownerId, state);
-        return filterBookingsByState(bookings, state).stream()
-                .map(BookingMapper::toBookingDto)
-                .collect(Collectors.toList());
+        return mapToBookingDtos(filterBookingsByState(bookings, state));
     }
 
     private void userExists(Long userId) {
@@ -139,5 +155,18 @@ public class BookingServiceImpl implements BookingService {
             default:
                 throw new ValidationException("Unknown state: " + state);
         }
+    }
+
+    private List<BookingDto> mapToBookingDtos(List<Booking> bookings) {
+        return bookings.stream()
+                .map(this::mapToBookingDto)
+                .collect(Collectors.toList());
+    }
+
+    private BookingDto mapToBookingDto(Booking booking) {
+        BookingDto dto = BookingMapper.toBookingDto(booking);
+        dto.setBooker(userService.getUserById(booking.getBooker().getId()));
+        dto.setItem(itemService.getItemById(booking.getItem().getId()));
+        return dto;
     }
 }

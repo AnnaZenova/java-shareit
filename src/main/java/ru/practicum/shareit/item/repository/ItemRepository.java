@@ -12,7 +12,7 @@ import java.util.Optional;
 public interface ItemRepository extends JpaRepository<Item, Long> {
     // addItem заменяется стандартным save()
     @Override
-    <S extends Item> S save(S entity);
+    Item save(Item item);
 
     // getItemById заменяется стандартным findById()
     @Override

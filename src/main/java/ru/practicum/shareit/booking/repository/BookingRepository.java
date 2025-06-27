@@ -15,7 +15,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     //Заменяем save
     @Override
-    <S extends Booking> S save(S entity);
+    Booking save(Booking booking);
 
     //Заменяем findById()
     @Override
@@ -33,11 +33,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     //Заменяем void deleteById(Long id);
     @Override
     void deleteById(Long id);
-
-    List<Booking> findByBookerIdAndStatusOrderByStartDesc(Long bookerId, Status status);
-
-    //Заменяем List<Booking> findByItemId(Long itemId);
-    List<Booking> findByItemOwnerIdAndStatusOrderByStartDesc(Long ownerId, Status status);
 
     @Query("SELECT b FROM Booking b " +
             "WHERE b.item.id = :itemId " +
@@ -62,33 +57,21 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(
             Long bookerId, LocalDateTime start, LocalDateTime end);
 
-    List<Booking> findByBookerIdAndEndBeforeOrderByStartDesc(Long bookerId, LocalDateTime end);
-
-    List<Booking> findByBookerIdAndStartAfterOrderByStartDesc(Long bookerId, LocalDateTime start);
-
-    List<Booking> findByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(
-            Long ownerId, LocalDateTime start, LocalDateTime end);
-
-    List<Booking> findByItemOwnerIdAndEndBeforeOrderByStartDesc(Long ownerId, LocalDateTime end);
-
-    List<Booking> findByItemOwnerIdAndStartAfterOrderByStartDesc(Long ownerId, LocalDateTime start);
-
     boolean existsByBookerIdAndItemIdAndEndBefore(Long bookerId, Long itemId, LocalDateTime end);
-
-    Optional<Booking> findFirstByItemIdAndEndBeforeOrderByEndDesc(
-            Long itemId,
-            LocalDateTime endBefore
-    );
-
-    Optional<Booking> findFirstByItemIdAndEndBeforeAndStatusIn(
-            Long itemId,
-            LocalDateTime end,
-            List<Status> statuses
-    );
 
     Optional<Booking> findFirstByItemIdAndStartAfterAndStatusIn(
             Long itemId,
             LocalDateTime start,
             List<Status> statuses
     );
+
+    @Query("SELECT b FROM Booking b " +
+            "WHERE b.item.id = :itemId " +
+            "AND b.end < :endDateTime " +
+            "AND b.status = :status " +
+            "ORDER BY b.end DESC")
+    Optional<Booking> findFirstByItemIdAndEndBeforeAndStatusOrderByEndDesc(
+            @Param("itemId") Long itemId,
+            @Param("endDateTime") LocalDateTime endDateTime,
+            @Param("status") Status status);
 }

@@ -1,16 +1,24 @@
 package ru.practicum.shareit.request;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Id;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
 import jakarta.validation.constraints.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import ru.practicum.shareit.user.model.User;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "requests")
-@Data
+@Setter
+@Getter
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 public class ItemRequest {
@@ -20,7 +28,7 @@ public class ItemRequest {
     private long id;
 
     @Column(name = "description", nullable = false, length = 1000)
-    @NotNull
+    @NotBlank(message = "Description не может быть пустым")
     private String description;
 
     @NotNull
@@ -29,5 +37,6 @@ public class ItemRequest {
     private User requester;
 
     @Column(name = "created", nullable = false)
+    @NotNull(message = "Created не может быть пустым")
     private LocalDateTime created;
 }

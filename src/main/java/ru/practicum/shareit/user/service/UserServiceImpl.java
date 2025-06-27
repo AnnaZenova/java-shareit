@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exceptions.ElementNotFoundException;
 import ru.practicum.shareit.exceptions.EmailAlreadyExistsException;
 import ru.practicum.shareit.exceptions.ValidationException;
@@ -18,15 +19,18 @@ import java.util.*;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public Collection<User> getAllUsers() {
         return userRepository.findAll();
     }
 
     @Override
+    @Transactional
     public UserDto addUser(@Valid UserDto userDto) {
         User user = UserMapper.toUser(userDto);
         checkEmailAvailability(user.getEmail());
@@ -35,6 +39,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserDto getUserById(Long id) {
         Optional<User> optionalUser = userRepository.findById(id);
         if (optionalUser.isEmpty()) {
@@ -45,6 +50,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserDto updateUser(Long userId, @Valid UserDto updatedUserDto) {
         User user = UserMapper.toUser(getUserById(userId));
         if (updatedUserDto.getName() != null) {
@@ -59,6 +65,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void removeUserById(long id) {
         log.info("Удален пользователь с ID :{}", id);
     }
@@ -84,8 +91,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public User getUserEntity(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new ElementNotFoundException("User not found"));
+                .orElseThrow(() -> new ElementNotFoundException("User не найден"));
     }
 }

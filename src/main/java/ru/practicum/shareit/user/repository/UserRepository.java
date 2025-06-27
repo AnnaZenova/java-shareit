@@ -15,7 +15,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // Заменяем User addUser(User user);
     @Override
-    <S extends User> S save(S entity);
+    User save(User user);
 
     // Заменяем Optional<User> getUserById(long id);
     @Override

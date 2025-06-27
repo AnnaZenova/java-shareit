@@ -21,15 +21,16 @@ import java.time.LocalDateTime;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class BookingDto {
     private Long id;
+    public static final String PATTERN = "yyyy-MM-dd'T'HH:mm:ss";
 
     @NotNull
     @FutureOrPresent
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @JsonFormat(pattern = PATTERN)
     private LocalDateTime start;
 
     @NotNull
     @Future
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @JsonFormat(pattern = PATTERN)
     private LocalDateTime end;
 
     @NotNull

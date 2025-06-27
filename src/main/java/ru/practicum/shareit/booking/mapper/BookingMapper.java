@@ -4,12 +4,14 @@ import lombok.experimental.UtilityClass;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
+import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 
 @UtilityClass
 public class BookingMapper {
-    public static BookingDto toBookingDto(Booking booking) {
+    public BookingDto toBookingDto(Booking booking) {
         if (booking == null) {
             return null;
         }
@@ -21,10 +23,13 @@ public class BookingMapper {
                 .itemId(booking.getItem().getId())
                 .bookerId(booking.getBooker() != null ? booking.getBooker().getId() : null)
                 .status(booking.getStatus())
+                // Добавляем полные объекты
+                .booker(UserMapper.toUserDto(booking.getBooker()))
+                .item(ItemMapper.toItemDto(booking.getItem()))
                 .build();
     }
 
-    public static Booking toBooking(BookingDto bookingDto, Item item, User booker) {
+    public Booking toBooking(BookingDto bookingDto, Item item, User booker) {
         Booking booking = new Booking();
         booking.setStart(bookingDto.getStart());
         booking.setEnd(bookingDto.getEnd());

@@ -23,7 +23,6 @@ public class BookingController {
     @PostMapping
     public ResponseEntity<BookingDto> createBooking(@RequestHeader(USER_ID_HEADER) Long userId,
                                                     @Valid @RequestBody BookingDto bookingDto) {
-        System.out.println("1");
         log.info("Получен запрос на создание бронирования от пользователя ID: {}", userId);
         return ResponseEntity.ok(bookingService.createBooking(userId, bookingDto));
     }

@@ -39,7 +39,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public UserDto getUserById(Long id) {
         Optional<User> optionalUser = userRepository.findById(id);
         if (optionalUser.isEmpty()) {
@@ -61,7 +60,7 @@ public class UserServiceImpl implements UserService {
             user.setEmail(updatedUserDto.getEmail());
         }
         log.info("Обновлена пользователь с ID :{}", userId);
-        return UserMapper.toUserDto(userRepository.updateUser(user));
+        return UserMapper.toUserDto(userRepository.save(user));
     }
 
     @Override
@@ -91,7 +90,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public User getUserEntity(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new ElementNotFoundException("User не найден"));

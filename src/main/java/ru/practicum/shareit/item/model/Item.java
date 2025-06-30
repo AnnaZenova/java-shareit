@@ -25,7 +25,6 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 @Setter
-@ToString
 @Table(name = "items")
 public class Item {
     @Id

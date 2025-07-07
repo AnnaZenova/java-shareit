@@ -5,16 +5,34 @@ import ru.practicum.shareit.booking.model.Booking;
 import java.util.List;
 import java.util.Optional;
 
-public interface BookingRepository {
-    Booking save(Booking booking);
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import ru.practicum.shareit.booking.model.Status;
+import java.time.LocalDateTime;
 
-    Optional<Booking> findById(Long id);
+public interface BookingRepository extends JpaRepository<Booking, Long> {
 
-    List<Booking> findByBookerId(Long bookerId);
+    // Бронирования пользователя, заменяем  List<Booking> findByBookerId(Long bookerId)
+    List<Booking> findByBookerIdOrderByStartDesc(Long bookerId);
 
-    List<Booking> findByItemOwnerId(Long ownerId);
+    // Бронирования владельца вещей, заменяем List<Booking> findByItemOwnerId(Long ownerId)
+    List<Booking> findByItemOwnerIdOrderByStartDesc(Long ownerId);
 
-    List<Booking> findByItemId(Long itemId);
+    boolean existsByBookerIdAndItemIdAndEndBefore(Long bookerId, Long itemId, LocalDateTime end);
 
-    void deleteById(Long id);
+    Optional<Booking> findFirstByItemIdAndStartAfterAndStatusIn(
+            Long itemId,
+            LocalDateTime start,
+            List<Status> statuses
+    );
+
+    @Query("SELECT b FROM Booking b " +
+            "WHERE b.item.id = :itemId " +
+            "AND b.end < :endDateTime " +
+            "AND b.status = :status " +
+            "ORDER BY b.end DESC")
+    Optional<Booking> findFirstByItemIdAndEndBeforeAndStatusOrderByEndDesc(@Param("itemId") Long itemId,
+                                                                           @Param("endDateTime") LocalDateTime endDateTime,
+                                                                           @Param("status") Status status);
 }

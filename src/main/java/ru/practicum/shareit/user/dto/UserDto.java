@@ -2,10 +2,12 @@ package ru.practicum.shareit.user.dto;
 
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import jakarta.validation.constraints.*;
 
 @Data
+@Builder
 @AllArgsConstructor
 public class UserDto {
     @NotNull(message = "ID cannot be null")

@@ -1,5 +1,7 @@
 package ru.practicum.shareit.booking;
 
+import jakarta.validation.Valid;
+import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -7,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.service.BookingService;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -19,7 +22,7 @@ public class BookingController {
 
     @PostMapping
     public ResponseEntity<BookingDto> createBooking(@RequestHeader(USER_ID_HEADER) Long userId,
-                                                    @RequestBody BookingDto bookingDto) {
+                                                    @Valid @RequestBody BookingDto bookingDto) {
         log.info("Получен запрос на создание бронирования от пользователя ID: {}", userId);
         return ResponseEntity.ok(bookingService.createBooking(userId, bookingDto));
     }
@@ -43,12 +46,16 @@ public class BookingController {
     @GetMapping
     public ResponseEntity<List<BookingDto>> getUserBookings(@RequestHeader(USER_ID_HEADER) Long userId,
                                                             @RequestParam(defaultValue = "ALL") String state) {
+        if (!Arrays.asList("ALL", "CURRENT", "PAST", "FUTURE", "WAITING", "REJECTED")
+                .contains(state.toUpperCase())) {
+            throw new ValidationException("Неизвестный state: " + state);
+        }
         log.info("Получен запрос на получение бронирований пользователя ID: {}", userId);
         return ResponseEntity.ok(bookingService.getUserBookings(userId, state));
     }
 
     @GetMapping("/owner")
-    public ResponseEntity<List<BookingDto>> getOwnerBookings(@RequestHeader Long ownerId,
+    public ResponseEntity<List<BookingDto>> getOwnerBookings(@RequestHeader(USER_ID_HEADER) Long ownerId,
                                                              @RequestParam(defaultValue = "ALL") String state) {
         log.info("Получен запрос на получение бронирований пользователя ID: {}", ownerId);
         return ResponseEntity.ok(bookingService.getOwnerBookings(ownerId, state));

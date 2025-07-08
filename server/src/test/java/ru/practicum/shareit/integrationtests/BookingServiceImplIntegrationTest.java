@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Status;
@@ -16,12 +17,12 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
+@ActiveProfiles("test")
 class BookingServiceImplIntegrationTest {
 
     @Autowired
@@ -37,26 +38,9 @@ class BookingServiceImplIntegrationTest {
     private User booker;
     private Item item;
 
-    private User createTestUser(String name, String email) {
-        UserDto userDto = UserDto.builder()
-                .name(name)
-                .email(email)
-                .build();
-        Long userId = userService.addUser(userDto).getId();
-        return userService.getUserEntity(userId);
-    }
-
-    private ItemDto createTestItemDto(User owner, String name, String description) {
-        return ItemDto.builder()
-                .name(name)
-                .description(description)
-                .available(true)
-                .build();
-    }
-
     @BeforeEach
-
     void setUp() {
+        // Создаём только по одному пользователю каждого типа
         owner = userService.getUserEntity(userService.addUser(UserDto.builder()
                 .name("Owner")
                 .email("owner@example.com")
@@ -67,10 +51,12 @@ class BookingServiceImplIntegrationTest {
                 .email("booker@example.com")
                 .build()).getId());
 
-        owner = createTestUser("Owner_" + UUID.randomUUID(), "owner_" + UUID.randomUUID() + "@example.com");
-        booker = createTestUser("Booker_" + UUID.randomUUID(), "booker_" + UUID.randomUUID() + "@example.com");
+        ItemDto itemDto = ItemDto.builder()
+                .name("Test Item")
+                .description("Test Description")
+                .available(true)
+                .build();
 
-        ItemDto itemDto = createTestItemDto(owner, "Item", "Description");
         item = itemService.getItemEntity(itemService.addItem(owner.getId(), itemDto).getId());
     }
 

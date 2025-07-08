@@ -18,5 +18,25 @@ services:
       timeout: 5s
       retries: 5
 
+  gateway:
+    build:
+      context: ./gateway
+    container_name: shareit-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  server:
+    build:
+      context: ./server
+    container_name: shareit-server
+    ports:
+      - "9090:9090"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
 volumes:
   postgres_data:

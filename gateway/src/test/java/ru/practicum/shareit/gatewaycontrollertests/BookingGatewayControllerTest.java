@@ -12,12 +12,14 @@ import ru.practicum.shareit.booking.BookingClient;
 import ru.practicum.shareit.booking.BookingGatewayController;
 import ru.practicum.shareit.booking.BookingRequestDto;
 
+import static org.mockito.ArgumentMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -33,7 +35,7 @@ class BookingGatewayControllerTest {
 
     @Test
     void createBooking() throws Exception {
-        // Форматируем даты без nanoseconds
+
         LocalDateTime start = LocalDateTime.now().plusDays(1).truncatedTo(ChronoUnit.SECONDS);
         LocalDateTime end = LocalDateTime.now().plusDays(2).truncatedTo(ChronoUnit.SECONDS);
 
@@ -78,6 +80,28 @@ class BookingGatewayControllerTest {
     void getOwnerBookings() throws Exception {
         mockMvc.perform(get("/bookings/owner?state=ALL")
                         .header("X-Sharer-User-Id", 1))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void getBooking_shouldReturn200() throws Exception {
+        when(bookingClient.getBooking(anyLong(), anyLong()))
+                .thenReturn(ResponseEntity.ok().build());
+
+        mockMvc.perform(get("/bookings/1")
+                        .header("X-Sharer-User-Id", 1))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void getUserBookings_shouldReturn200() throws Exception {
+        when(bookingClient.getUserBookings(anyLong(), anyString()))
+                .thenReturn(ResponseEntity.ok().build());
+
+        mockMvc.perform(get("/bookings")
+                        .header("X-Sharer-User-Id", 1)
+                        .param("state", "ALL")
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
 }

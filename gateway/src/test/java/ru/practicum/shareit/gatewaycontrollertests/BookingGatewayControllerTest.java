@@ -6,13 +6,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.booking.BookingClient;
 import ru.practicum.shareit.booking.BookingGatewayController;
 import ru.practicum.shareit.booking.BookingRequestDto;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -27,15 +33,23 @@ class BookingGatewayControllerTest {
 
     @Test
     void createBooking() throws Exception {
-        BookingRequestDto bookingDto = new BookingRequestDto();
-        bookingDto.setItemId(1L);
-        bookingDto.setStart(LocalDateTime.now().plusDays(1));
-        bookingDto.setEnd(LocalDateTime.now().plusDays(2));
+        // Форматируем даты без nanoseconds
+        LocalDateTime start = LocalDateTime.now().plusDays(1).truncatedTo(ChronoUnit.SECONDS);
+        LocalDateTime end = LocalDateTime.now().plusDays(2).truncatedTo(ChronoUnit.SECONDS);
+
+        String requestBody = String.format(
+                "{\"itemId\":1,\"start\":\"%s\",\"end\":\"%s\"}",
+                start.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                end.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+        );
+
+        when(bookingClient.createBooking(anyLong(), any(BookingRequestDto.class)))
+                .thenReturn(ResponseEntity.ok().build());
 
         mockMvc.perform(post("/bookings")
                         .header("X-Sharer-User-Id", 1)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"itemId\":1,\"start\":\"2023-01-01T10:00:00\",\"end\":\"2023-01-02T10:00:00\"}"))
+                        .content(requestBody))
                 .andExpect(status().isOk());
     }
 

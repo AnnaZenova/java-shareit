@@ -11,7 +11,7 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ItemRequestResponseServiceImpl implements ItemRequestResponseService{
+public class ItemRequestResponseServiceImpl implements ItemRequestResponseService {
     private final ItemRepository itemRepository;
 
     @Override

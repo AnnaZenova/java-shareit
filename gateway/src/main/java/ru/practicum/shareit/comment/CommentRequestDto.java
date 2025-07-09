@@ -25,6 +25,7 @@ public class CommentRequestDto {
     private ItemRequestDto itemRequestDto;
 
     private UserRequestDto author;
+
     private String authorName;
 
     private LocalDateTime created;

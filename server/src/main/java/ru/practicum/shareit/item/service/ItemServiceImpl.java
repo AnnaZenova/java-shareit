@@ -119,6 +119,9 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public Collection<ItemDto> searchAvailableItems(String text) {
         log.info("Поиск вещей по запросу: {}", text);
+        if (text.isBlank()) {
+            return List.of();
+        }
         return itemRepository.searchAvailableItems(text.toLowerCase()).stream()
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());

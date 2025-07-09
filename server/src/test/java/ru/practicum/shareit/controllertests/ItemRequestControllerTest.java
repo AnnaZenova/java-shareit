@@ -1,6 +1,7 @@
 package ru.practicum.shareit.controllertests;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -21,6 +22,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(controllers = ItemRequestController.class)
 class ItemRequestControllerTest {
+    private static final String USER_ID_HEADER = "X-Sharer-User-Id";
+    private static final long TEST_USER_ID = 1L;
+    private static final long TEST_REQUEST_ID = 1L;
+    private static final String TEST_DESCRIPTION = "Нужна дрель";
 
     @Autowired
     private MockMvc mockMvc;
@@ -31,32 +36,29 @@ class ItemRequestControllerTest {
     @MockBean
     private ItemRequestService itemRequestService;
 
-    private ItemRequestDto createTestRequestDto() {
-        ItemRequestDto requestDto = new ItemRequestDto();
-        requestDto.setId(1L);
-        requestDto.setDescription("Нужна дрель");
-        requestDto.setCreated(LocalDateTime.now());
-        return requestDto;
-    }
+    private ItemRequestDto requestDto;
+    private ItemRequestWithItemsDto requestWithItemsDto;
 
-    private ItemRequestWithItemsDto createTestRequestWithItemsDto() {
-        ItemRequestWithItemsDto dto = new ItemRequestWithItemsDto();
-        dto.setId(1L);
-        dto.setDescription("Нужна дрель");
-        dto.setCreated(LocalDateTime.now());
-        return dto;
+    @BeforeEach
+    void setUp() {
+        requestDto = new ItemRequestDto();
+        requestDto.setId(TEST_REQUEST_ID);
+        requestDto.setDescription(TEST_DESCRIPTION);
+        requestDto.setCreated(LocalDateTime.now());
+
+        requestWithItemsDto = new ItemRequestWithItemsDto();
+        requestWithItemsDto.setId(TEST_REQUEST_ID);
+        requestWithItemsDto.setDescription(TEST_DESCRIPTION);
+        requestWithItemsDto.setCreated(LocalDateTime.now());
     }
 
     @Test
     void createRequest_ShouldReturnCreatedRequest() throws Exception {
-        ItemRequestDto requestDto = createTestRequestDto();
-        when(itemRequestService.createRequest(anyLong(), any()))
-                .thenReturn(requestDto);
         when(itemRequestService.createRequest(anyLong(), any()))
                 .thenReturn(requestDto);
 
         mockMvc.perform(post("/requests")
-                        .header("X-Sharer-User-Id", 1)
+                        .header(USER_ID_HEADER, TEST_USER_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto)))
                 .andExpect(status().isCreated());
@@ -64,43 +66,31 @@ class ItemRequestControllerTest {
 
     @Test
     void getUserRequests_ShouldReturnRequestsList() throws Exception {
-        ItemRequestWithItemsDto requestWithItemsDto = createTestRequestWithItemsDto();
-        ItemRequestDto requestDto = createTestRequestDto();
-        when(itemRequestService.createRequest(anyLong(), any()))
-                .thenReturn(requestDto);
         when(itemRequestService.getUserRequests(anyLong()))
                 .thenReturn(Collections.singletonList(requestWithItemsDto));
 
         mockMvc.perform(get("/requests")
-                        .header("X-Sharer-User-Id", 1))
+                        .header(USER_ID_HEADER, TEST_USER_ID))
                 .andExpect(status().isOk());
     }
 
     @Test
     void getAllRequests_ShouldReturnRequestsList() throws Exception {
-        ItemRequestWithItemsDto requestWithItemsDto = createTestRequestWithItemsDto();
-        ItemRequestDto requestDto = createTestRequestDto();
-        when(itemRequestService.createRequest(anyLong(), any()))
-                .thenReturn(requestDto);
         when(itemRequestService.getAllRequests(anyLong(), anyInt(), anyInt()))
                 .thenReturn(Collections.singletonList(requestWithItemsDto));
 
         mockMvc.perform(get("/requests/all?from=0&size=10")
-                        .header("X-Sharer-User-Id", 1))
+                        .header(USER_ID_HEADER, TEST_USER_ID))
                 .andExpect(status().isOk());
     }
 
     @Test
     void getRequestById_ShouldReturnRequest() throws Exception {
-        ItemRequestWithItemsDto requestWithItemsDto = createTestRequestWithItemsDto();
-        ItemRequestDto requestDto = createTestRequestDto();
-        when(itemRequestService.createRequest(anyLong(), any()))
-                .thenReturn(requestDto);
         when(itemRequestService.getRequestById(anyLong(), anyLong()))
                 .thenReturn(requestWithItemsDto);
 
-        mockMvc.perform(get("/requests/1")
-                        .header("X-Sharer-User-Id", 1))
+        mockMvc.perform(get("/requests/{requestId}", TEST_REQUEST_ID)
+                        .header(USER_ID_HEADER, TEST_USER_ID))
                 .andExpect(status().isOk());
     }
 }

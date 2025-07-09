@@ -10,6 +10,8 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.practicum.shareit.BaseClient;
 import ru.practicum.shareit.comment.CommentRequestDto;
 
+import java.util.List;
+
 @Component
 public class ItemClient extends BaseClient {
     private static final String API_PREFIX = "/items";
@@ -41,6 +43,9 @@ public class ItemClient extends BaseClient {
     }
 
     public ResponseEntity<Object> searchAvailableItems(String text) {
+        if (text.isBlank()) {
+            return ResponseEntity.ok(List.of());
+        }
         return get("/search?text=" + text, 0);
     }
 

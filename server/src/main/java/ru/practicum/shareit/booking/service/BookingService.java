@@ -15,4 +15,6 @@ public interface BookingService {
     List<BookingDto> getOwnerBookings(Long ownerId, String state);
 
     boolean hasUserBookedItem(Long userId, Long itemId);
+
+    void validateBookingState(String state);
 }

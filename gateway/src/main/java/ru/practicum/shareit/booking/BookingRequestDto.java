@@ -1,6 +1,5 @@
 package ru.practicum.shareit.booking;
 
-
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.FutureOrPresent;
@@ -18,16 +17,18 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BookingRequestDto {
+    public static final String DATE_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss";
+
     @NotNull
     private Long itemId;
 
     @NotNull
     @FutureOrPresent(message = "Start date должна быть в настоящем или будущем")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @JsonFormat(pattern = DATE_TIME_PATTERN)
     private LocalDateTime start;
 
     @NotNull
     @Future(message = "End date должна быть в будущем")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @JsonFormat(pattern = DATE_TIME_PATTERN)
     private LocalDateTime end;
 }

@@ -27,7 +27,7 @@ class ItemGatewayControllerTest {
                         .header("X-Sharer-User-Id", 1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"Item\",\"description\":\"Description\",\"available\":true}"))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
     }
 
     @Test
@@ -65,6 +65,6 @@ class ItemGatewayControllerTest {
                         .header("X-Sharer-User-Id", 1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"text\":\"Comment\"}"))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
     }
 }

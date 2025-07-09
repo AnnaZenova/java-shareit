@@ -8,6 +8,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.practicum.shareit.BaseClient;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import ru.practicum.shareit.exceptions.ValidationException;
+
+import java.util.Arrays;
 
 @Component
 public class BookingClient extends BaseClient {
@@ -23,7 +26,6 @@ public class BookingClient extends BaseClient {
         );
     }
 
-
     public ResponseEntity<Object> createBooking(long userId, BookingRequestDto bookingRequestDto) {
         return post("", userId, bookingRequestDto);
     }
@@ -37,6 +39,10 @@ public class BookingClient extends BaseClient {
     }
 
     public ResponseEntity<Object> getUserBookings(long userId, String state) {
+        if (!Arrays.asList("ALL", "CURRENT", "PAST", "FUTURE", "WAITING", "REJECTED")
+                .contains(state.toUpperCase())) {
+            throw new ValidationException("Unknown state: " + state);
+        }
         return get("?state=" + state, userId);
     }
 

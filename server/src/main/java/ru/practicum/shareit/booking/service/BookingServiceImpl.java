@@ -17,6 +17,7 @@ import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -178,5 +179,13 @@ public class BookingServiceImpl implements BookingService {
         return bookings.stream()
                 .filter(b -> b.getStatus() == status)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public void validateBookingState(String state) {
+        if (!Arrays.asList("ALL", "CURRENT", "PAST", "FUTURE", "WAITING", "REJECTED")
+                .contains(state.toUpperCase())) {
+            throw new ValidationException("Unknown state: " + state);
+        }
     }
 }

@@ -29,6 +29,7 @@ class ItemRequestServiceImplIntegrationTest {
     private UserService userService;
 
     private User requester;
+    private ItemRequestDto requestDto;
 
     @BeforeEach
     void setUp() {
@@ -36,14 +37,14 @@ class ItemRequestServiceImplIntegrationTest {
                 .name("Requester")
                 .email("requester@example.com")
                 .build()));
+
+        requestDto = ItemRequestDto.builder()
+                .description("Need item")
+                .build();
     }
 
     @Test
     void createRequest_shouldCreateRequest() {
-        ItemRequestDto requestDto = ItemRequestDto.builder()
-                .description("Need item")
-                .build();
-
         ItemRequestDto created = requestService.createRequest(requester.getId(), requestDto);
 
         assertNotNull(created.getId());
@@ -52,11 +53,7 @@ class ItemRequestServiceImplIntegrationTest {
 
     @Test
     void getRequestById_shouldReturnRequest() {
-        ItemRequestDto requestDto = ItemRequestDto.builder()
-                .description("Need item")
-                .build();
         ItemRequestDto created = requestService.createRequest(requester.getId(), requestDto);
-
         var found = requestService.getRequestById(requester.getId(), created.getId());
 
         assertEquals(created.getId(), found.getId());

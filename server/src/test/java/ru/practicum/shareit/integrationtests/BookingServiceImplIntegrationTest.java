@@ -39,10 +39,11 @@ class BookingServiceImplIntegrationTest {
     private User owner;
     private User booker;
     private Item item;
+    private BookingDto testBookingDto;
 
     @BeforeEach
     void setUp() {
-        // Создаём только по одному пользователю каждого типа
+
         owner = userService.getUserEntity(userService.addUser(UserDto.builder()
                 .name("Owner")
                 .email("owner@example.com")
@@ -58,19 +59,18 @@ class BookingServiceImplIntegrationTest {
                 .description("Test Description")
                 .available(true)
                 .build();
-
         item = itemService.getItemEntity(itemService.addItem(owner.getId(), itemDto).getId());
-    }
 
-    @Test
-    void createBooking_shouldCreateBooking() {
-        BookingDto bookingDto = BookingDto.builder()
+        testBookingDto = BookingDto.builder()
                 .itemId(item.getId())
                 .start(LocalDateTime.now().plusDays(1))
                 .end(LocalDateTime.now().plusDays(2))
                 .build();
+    }
 
-        BookingDto created = bookingService.createBooking(booker.getId(), bookingDto);
+    @Test
+    void createBooking_shouldCreateBooking() {
+        BookingDto created = bookingService.createBooking(booker.getId(), testBookingDto);
 
         assertNotNull(created.getId());
         assertEquals(Status.WAITING, created.getStatus());
@@ -80,13 +80,7 @@ class BookingServiceImplIntegrationTest {
 
     @Test
     void approveBooking_shouldApproveBooking() {
-        BookingDto bookingDto = BookingDto.builder()
-                .itemId(item.getId())
-                .start(LocalDateTime.now().plusDays(1))
-                .end(LocalDateTime.now().plusDays(2))
-                .build();
-        BookingDto created = bookingService.createBooking(booker.getId(), bookingDto);
-
+        BookingDto created = bookingService.createBooking(booker.getId(), testBookingDto);
         BookingDto approved = bookingService.approveBooking(owner.getId(), created.getId(), true);
 
         assertEquals(Status.APPROVED, approved.getStatus());
@@ -94,13 +88,7 @@ class BookingServiceImplIntegrationTest {
 
     @Test
     void getBookingById_shouldReturnBooking() {
-        BookingDto bookingDto = BookingDto.builder()
-                .itemId(item.getId())
-                .start(LocalDateTime.now().plusDays(1))
-                .end(LocalDateTime.now().plusDays(2))
-                .build();
-        BookingDto created = bookingService.createBooking(booker.getId(), bookingDto);
-
+        BookingDto created = bookingService.createBooking(booker.getId(), testBookingDto);
         BookingDto found = bookingService.getBookingById(booker.getId(), created.getId());
 
         assertEquals(created.getId(), found.getId());

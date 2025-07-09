@@ -1,4 +1,5 @@
 package ru.practicum.shareit.integrationtests;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,8 @@ class ItemServiceImplIntegrationTest {
     private UserService userService;
 
     private User owner;
+    private ItemDto itemDto;
+    private ItemDto updateDto;
 
     @BeforeEach
     void setUp() {
@@ -35,16 +38,20 @@ class ItemServiceImplIntegrationTest {
                 .name("Owner")
                 .email("owner@example.com")
                 .build()));
-    }
 
-    @Test
-    void addItem_shouldCreateItem() {
-        ItemDto itemDto = ItemDto.builder()
+        itemDto = ItemDto.builder()
                 .name("Item")
                 .description("Description")
                 .available(true)
                 .build();
 
+        updateDto = ItemDto.builder()
+                .name("Updated Item")
+                .build();
+    }
+
+    @Test
+    void addItem_shouldCreateItem() {
         ItemDto created = itemService.addItem(owner.getId(), itemDto);
 
         assertNotNull(created.getId());
@@ -54,17 +61,7 @@ class ItemServiceImplIntegrationTest {
 
     @Test
     void updateItem_shouldUpdateItem() {
-        ItemDto itemDto = ItemDto.builder()
-                .name("Item")
-                .description("Description")
-                .available(true)
-                .build();
         ItemDto created = itemService.addItem(owner.getId(), itemDto);
-
-        ItemDto updateDto = ItemDto.builder()
-                .name("Updated Item")
-                .build();
-
         ItemDto updated = itemService.updateItem(owner.getId(), created.getId(), updateDto);
 
         assertEquals("Updated Item", updated.getName());
@@ -73,13 +70,7 @@ class ItemServiceImplIntegrationTest {
 
     @Test
     void getItemById_shouldReturnItem() {
-        ItemDto itemDto = ItemDto.builder()
-                .name("Item")
-                .description("Description")
-                .available(true)
-                .build();
         ItemDto created = itemService.addItem(owner.getId(), itemDto);
-
         ItemDto found = itemService.getItemById(created.getId(), owner.getId());
 
         assertEquals(created.getId(), found.getId());

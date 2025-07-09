@@ -31,6 +31,7 @@ public class UserClient extends BaseClient {
     }
 
     public ResponseEntity<Object> addUser(UserRequestDto userRequestDto) {
+        userRequestDto.setId(null);
         return post("", userRequestDto);
     }
 

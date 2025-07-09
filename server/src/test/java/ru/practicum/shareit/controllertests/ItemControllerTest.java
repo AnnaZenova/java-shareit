@@ -1,6 +1,7 @@
 package ru.practicum.shareit.controllertests;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -19,6 +20,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(controllers = ItemController.class)
 class ItemControllerTest {
+    private static final String USER_ID_HEADER = "X-Sharer-User-Id";
+    private static final long TEST_USER_ID = 1L;
+    private static final long TEST_ITEM_ID = 1L;
 
     @Autowired
     private MockMvc mockMvc;
@@ -29,36 +33,36 @@ class ItemControllerTest {
     @MockBean
     private ItemService itemService;
 
-    private ItemDto createTestItemDto() {
-        ItemDto itemDto = new ItemDto();
-        itemDto.setId(1L);
+    private ItemDto itemDto;
+
+    @BeforeEach
+    void setUp() {
+        itemDto = new ItemDto();
+        itemDto.setId(TEST_ITEM_ID);
         itemDto.setName("Дрель");
         itemDto.setDescription("Простая дрель");
         itemDto.setAvailable(true);
-        return itemDto;
     }
 
     @Test
     void addItem_ShouldReturnItem() throws Exception {
-        ItemDto itemDto = createTestItemDto();
         when(itemService.addItem(anyLong(), any()))
                 .thenReturn(itemDto);
 
         mockMvc.perform(post("/items")
-                        .header("X-Sharer-User-Id", 1)
+                        .header(USER_ID_HEADER, TEST_USER_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(itemDto)))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
     }
 
     @Test
     void updateItem_ShouldReturnUpdatedItem() throws Exception {
-        ItemDto itemDto = createTestItemDto();
         when(itemService.updateItem(anyLong(), anyLong(), any()))
                 .thenReturn(itemDto);
 
         mockMvc.perform(patch("/items/1")
-                        .header("X-Sharer-User-Id", 1)
+                        .header(USER_ID_HEADER, TEST_USER_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(itemDto)))
                 .andExpect(status().isOk());
@@ -66,29 +70,26 @@ class ItemControllerTest {
 
     @Test
     void getItem_ShouldReturnItem() throws Exception {
-        ItemDto itemDto = createTestItemDto();
         when(itemService.getItemById(anyLong(), anyLong()))
                 .thenReturn(itemDto);
 
         mockMvc.perform(get("/items/1")
-                        .header("X-Sharer-User-Id", 1))
+                        .header(USER_ID_HEADER, TEST_USER_ID))
                 .andExpect(status().isOk());
     }
 
     @Test
     void getUserItems_ShouldReturnItemsList() throws Exception {
-        ItemDto itemDto = createTestItemDto();
         when(itemService.getUserItems(anyLong()))
                 .thenReturn(Collections.singletonList(itemDto));
 
         mockMvc.perform(get("/items")
-                        .header("X-Sharer-User-Id", 1))
+                        .header(USER_ID_HEADER, TEST_USER_ID))
                 .andExpect(status().isOk());
     }
 
     @Test
     void searchAvailableItems_ShouldReturnItemsList() throws Exception {
-        ItemDto itemDto = createTestItemDto();
         when(itemService.searchAvailableItems(anyString()))
                 .thenReturn(Collections.singletonList(itemDto));
 
